@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Flegmit Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar h1 {
+            font-size: 1.5rem;
+        }
+        
+        .navbar nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .navbar nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background-color: #229954;
+        }
+        
+        .help-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .form-actions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Flegmit Admin</h1>
+        <nav>
+            <a href="/admin">Dashboard</a>
+            <a href="/admin/pages">Pages</a>
+            <a href="/admin/posts">Posts</a>
+            <a href="/admin/settings">Settings</a>
+            <a href="/" target="_blank">View Site</a>
+            <form method="POST" action="/admin/logout" style="display: inline;">
+                <button type="submit" class="btn" style="background: transparent; border: 1px solid white;">Logout</button>
+            </form>
+        </nav>
+    </nav>
+    
+    <div class="container">
+        <h2 style="margin-bottom: 2rem;">Site Settings</h2>
+        
+        <form method="POST" action="/admin/settings">
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">General Settings</h3>
+                
+                <div class="form-group">
+                    <label for="site_title">Site Title</label>
+                    <input type="text" id="site_title" name="site_title" 
+                           value="<%= settings.site_title || '' %>" required>
+                    <div class="help-text">The name of your website</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="site_description">Site Description</label>
+                    <textarea id="site_description" name="site_description" 
+                              rows="3"><%= settings.site_description || '' %></textarea>
+                    <div class="help-text">A brief description of your website for search engines</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="site_url">Site URL</label>
+                    <input type="url" id="site_url" name="site_url" 
+                           value="<%= settings.site_url || '' %>" required>
+                    <div class="help-text">The full URL where your site will be deployed (e.g., https://yoursite.com)</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">SEO & Social</h3>
+                
+                <div class="form-group">
+                    <label for="site_keywords">Keywords</label>
+                    <input type="text" id="site_keywords" name="site_keywords" 
+                           value="<%= settings.site_keywords || '' %>">
+                    <div class="help-text">Comma-separated keywords for SEO (optional)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="site_author">Site Author</label>
+                    <input type="text" id="site_author" name="site_author" 
+                           value="<%= settings.site_author || '' %>">
+                    <div class="help-text">The main author or owner of the site</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="site_language">Language</label>
+                    <input type="text" id="site_language" name="site_language" 
+                           value="<%= settings.site_language || 'en' %>" 
+                           pattern="[a-z]{2}"
+                           title="Two-letter language code (e.g., en, fr, es)">
+                    <div class="help-text">Two-letter language code (e.g., en for English)</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom: 1.5rem;">Theme & Appearance</h3>
+                
+                <div class="form-group">
+                    <label for="theme_color">Theme Color</label>
+                    <input type="color" id="theme_color" name="theme_color" 
+                           value="<%= settings.theme_color || '#3498db' %>">
+                    <div class="help-text">Primary color for your site theme</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="header_code">Header Code</label>
+                    <textarea id="header_code" name="header_code" 
+                              rows="5" 
+                              placeholder="&lt;!-- Analytics or custom CSS here --&gt;"><%= settings.header_code || '' %></textarea>
+                    <div class="help-text">Custom HTML/CSS/JS code to include in the site header (optional)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="footer_code">Footer Code</label>
+                    <textarea id="footer_code" name="footer_code" 
+                              rows="3" 
+                              placeholder="&lt;!-- Tracking codes or scripts here --&gt;"><%= settings.footer_code || '' %></textarea>
+                    <div class="help-text">Custom HTML/JS code to include before closing body tag (optional)</div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Save Settings</button>
+                <a href="/admin" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
