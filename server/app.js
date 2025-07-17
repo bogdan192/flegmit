@@ -11,8 +11,7 @@ const db = new Database();
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../admin')));
-app.use(express.static(path.join(__dirname, '../build')));
+app.use('/admin/assets', express.static(path.join(__dirname, '../admin')));
 
 // Session configuration
 app.use(session({
@@ -37,22 +36,6 @@ function requireAuth(req, res, next) {
     return res.redirect('/admin/login');
   }
 }
-
-// Routes
-
-// Public routes (serve static site)
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build/index.html'));
-});
-
-app.get('/:slug', (req, res) => {
-  const filePath = path.join(__dirname, '../build', req.params.slug + '.html');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(404).sendFile(path.join(__dirname, '../build/404.html'));
-    }
-  });
-});
 
 // Admin login routes
 app.get('/admin/login', (req, res) => {
@@ -274,6 +257,38 @@ app.post('/admin/settings', requireAuth, (req, res) => {
         res.redirect('/admin/settings');
       }
     });
+  });
+});
+
+// Public routes (serve static site)
+app.get('/', (req, res) => {
+  const filePath = path.join(__dirname, '../build/index.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(404).send('Site not built yet. Please run the build process.');
+    }
+  });
+});
+
+// Serve static assets from build directory
+app.use(express.static(path.join(__dirname, '../build')));
+
+app.get('/:slug', (req, res) => {
+  // Don't serve static files for admin routes
+  if (req.params.slug.startsWith('admin')) {
+    return next();
+  }
+  
+  const filePath = path.join(__dirname, '../build', req.params.slug + '.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      const notFoundPath = path.join(__dirname, '../build/404.html');
+      res.status(404).sendFile(notFoundPath, (err2) => {
+        if (err2) {
+          res.status(404).send('Page not found');
+        }
+      });
+    }
   });
 });
 

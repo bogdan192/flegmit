@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node server/app.js",
     "build": "node scripts/build.js",
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "build:watch": "nodemon scripts/build.js",
+    "setup": "node -e \"const db = require('./server/database'); new db();\""
   },
   "dependencies": {
     "express": "^4.18.2",
