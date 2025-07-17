@@ -1,10 +1,15 @@
 services:
-  # Static Site Service
+  # Full Site Service (Static + CMS Admin)
   - type: web
-    name: flegmit-site
-    env: static
-    buildCommand: npm run setup && npm run build
-    staticPublishPath: ./build
+    name: flegmit
+    env: node
+    buildCommand: npm install && npm run setup && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
     headers:
       - path: /*
         name: X-Frame-Options
@@ -12,22 +17,6 @@ services:
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-  # CMS Admin Service (Optional - for content management)
-  - type: web
-    name: flegmit-admin
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: SESSION_SECRET
-        generateValue: true
     disk:
       name: flegmit-db
       mountPath: /opt/render/project/src/database
