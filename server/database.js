@@ -1,9 +1,16 @@
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const path = require('path');
+const fs = require('fs');
 
 class Database {
   constructor() {
+    // Ensure database directory exists
+    const dbDir = path.join(__dirname, '../database');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    
     this.db = new sqlite3.Database(path.join(__dirname, '../database/site.db'));
     this.init();
   }

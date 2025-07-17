@@ -3,7 +3,7 @@ services:
   - type: web
     name: flegmit-site
     env: static
-    buildCommand: npm run build
+    buildCommand: npm run setup && npm run build
     staticPublishPath: ./build
     headers:
       - path: /*
