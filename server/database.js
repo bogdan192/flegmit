@@ -6,12 +6,17 @@ const fs = require('fs');
 class Database {
   constructor() {
     // Ensure database directory exists
-    const dbDir = path.join(__dirname, '../database');
+    // In production on Render, use the mounted disk path
+    const dbDir = process.env.NODE_ENV === 'production' 
+      ? '/opt/render/project/src/database'
+      : path.join(__dirname, '../database');
+      
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
     }
     
-    this.db = new sqlite3.Database(path.join(__dirname, '../database/site.db'));
+    const dbPath = path.join(dbDir, 'site.db');
+    this.db = new sqlite3.Database(dbPath);
     this.init();
   }
 

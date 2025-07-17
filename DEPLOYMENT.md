@@ -1,35 +1,61 @@
 # Deployment Guide for Render
 
-## Option 1: Static Site Only (Recommended for Production)
+## Unified Deployment (Recommended)
 
-For a pure static site deployment:
+The updated configuration provides a single service that handles both static site serving and admin functionality:
+
+### Quick Deploy with Render
 
 1. **Connect Repository**: Link your GitHub repository to Render
-2. **Create Static Site**: 
-   - Build Command: `npm run build`
-   - Publish Directory: `build`
-3. **Deploy**: Your static site will be available at the Render URL
+2. **Use render.yaml**: The included `render.yaml` automatically configures:
+   - Node.js environment with both static serving and admin interface
+   - Database persistence via mounted disk storage
+   - Security headers and environment variables
+3. **Deploy**: Your site will be available with both public pages and admin interface
 
-## Option 2: Full CMS + Static Site
+### What You Get
 
-For development or if you need ongoing content management:
+- **Public Site**: Home, About, Blog pages served statically
+- **Admin Interface**: Accessible at `/admin` with login functionality
+- **Content Management**: Create and edit pages/posts through the admin
+- **Build Integration**: Auto-rebuilds static files when content changes
 
-1. **Deploy both services** from the `render.yaml` configuration
-2. **Static Site Service**: Serves the built static files
-3. **CMS Admin Service**: Provides the admin interface for content management
+### Default Credentials
 
-### Environment Variables for CMS Service
+- **Username**: `bogdan`
+- **Password**: `bogdan`
 
-- `NODE_ENV`: Set to `production`
-- `SESSION_SECRET`: Generate a secure random value
+⚠️ **Important**: Change these credentials immediately after deployment!
 
-### Database Persistence
+## Alternative: Static-Only Deployment
 
-The CMS service includes persistent disk storage for the SQLite database to ensure content persists across deployments.
+For a pure static site without admin functionality:
+
+1. **Build locally**: `npm run build`
+2. **Deploy build/ directory** to any static hosting service
+3. **Note**: No content management capabilities
 
 ## Manual Deployment Steps
 
-### For Static Site Only:
+### For Full Site (with Admin):
+
+```bash
+# Install dependencies
+npm install
+
+# Initialize database
+npm run setup
+
+# Build static files
+npm run build
+
+# Start server (serves both static and admin)
+npm start
+
+# Access admin at http://localhost:3000/admin
+```
+
+### For Static-Only:
 
 ```bash
 # Build the static site
@@ -38,28 +64,40 @@ npm run build
 # Deploy the build/ directory to any static hosting service
 ```
 
-### For Development:
-
-```bash
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-
-# Access admin at http://localhost:3000/admin
-# Default login: bogdan/bogdan
-```
-
 ## Production Considerations
 
-1. **Change Default Credentials**: Update the default admin password in production
-2. **Secure Session Secret**: Use a strong, randomly generated session secret
-3. **Database Backups**: Regularly backup the SQLite database if using the CMS service
-4. **HTTPS**: Ensure your deployment uses HTTPS for security
+1. **Security**: Change default admin credentials immediately
+2. **Environment Variables**: 
+   - `NODE_ENV=production`
+   - `SESSION_SECRET`: Use a strong, randomly generated value
+3. **Database Backups**: SQLite database is stored in persistent disk storage
+4. **HTTPS**: Render provides HTTPS automatically
+
+## Features
+
+- ✅ **Home and About pages** working correctly
+- ✅ **Admin panel** accessible with login functionality  
+- ✅ **Blog post creation** and management
+- ✅ **Page editing** capabilities
+- ✅ **Static site generation** for fast loading
+- ✅ **Responsive design** for mobile and desktop
+
+## Troubleshooting
+
+### Common Issues Fixed:
+- ❌ 404 errors for Home/About pages → ✅ Fixed routing configuration
+- ❌ Missing admin access → ✅ Admin link added to navigation
+- ❌ Database path issues → ✅ Production-ready database configuration
+
+### Navigation:
+- **Home**: `/` (also `/index.html`)
+- **About**: `/about` (also `/about.html`) 
+- **Blog**: `/blog` (lists all posts)
+- **Admin**: `/admin` (login required)
 
 ## Customization
 
-- **Styling**: Modify the CSS generation in `scripts/build.js`
-- **Templates**: Edit EJS templates in `views/` directory
+- **Styling**: Modify CSS generation in `scripts/build.js`
+- **Templates**: Edit EJS templates in `views/` directory  
 - **Content Structure**: Extend database schema in `server/database.js`
+- **Admin Interface**: Customize admin templates in `views/` directory

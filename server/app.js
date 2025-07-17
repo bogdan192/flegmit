@@ -273,7 +273,7 @@ app.get('/', (req, res) => {
 // Serve static assets from build directory
 app.use(express.static(path.join(__dirname, '../build')));
 
-app.get('/:slug', (req, res) => {
+app.get('/:slug', (req, res, next) => {
   // Don't serve static files for admin routes
   if (req.params.slug.startsWith('admin')) {
     return next();

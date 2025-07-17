@@ -130,6 +130,7 @@ class StaticSiteBuilder {
                     <li><a href="/" ${isHomePage ? 'class="active"' : ''}>Home</a></li>
                     <li><a href="/about">About</a></li>
                     <li><a href="/blog">Blog</a></li>
+                    <li><a href="/admin" class="admin-link">Admin</a></li>
                 </ul>
             </nav>
         </div>
@@ -210,6 +211,18 @@ body {
 .nav-menu a:hover,
 .nav-menu a.active {
     opacity: 0.8;
+}
+
+.nav-menu .admin-link {
+    background-color: rgba(255,255,255,0.2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.nav-menu .admin-link:hover {
+    background-color: rgba(255,255,255,0.3);
+    opacity: 1;
 }
 
 /* Main Content */
