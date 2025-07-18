@@ -270,15 +270,17 @@ app.get('/', (req, res) => {
   });
 });
 
-// Serve static assets from build directory
-app.use(express.static(path.join(__dirname, '../build')));
-
-app.get('/:slug', (req, res, next) => {
-  // Don't serve static files for admin routes
-  if (req.params.slug.startsWith('admin')) {
+// Serve static assets from build directory, but exclude admin paths
+app.use((req, res, next) => {
+  // Skip static file serving for any admin routes
+  if (req.path.startsWith('/admin')) {
     return next();
   }
-  
+  express.static(path.join(__dirname, '../build'))(req, res, next);
+});
+
+app.get('/:slug', (req, res, next) => {
+  // This route should never handle admin paths due to middleware above
   const filePath = path.join(__dirname, '../build', req.params.slug + '.html');
   res.sendFile(filePath, (err) => {
     if (err) {
