@@ -19,7 +19,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: false, // Set to true if using HTTPS
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production (HTTPS)
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -37,15 +37,18 @@ function requireAuth(req, res, next) {
   }
 }
 
+// Create admin router for better organization and separation
+const adminRouter = express.Router();
+
 // Admin login routes
-app.get('/admin/login', (req, res) => {
+adminRouter.get('/login', (req, res) => {
   if (req.session && req.session.user) {
     return res.redirect('/admin');
   }
   res.render('login', { error: null });
 });
 
-app.post('/admin/login', (req, res) => {
+adminRouter.post('/login', (req, res) => {
   const { username, password } = req.body;
   
   db.getUserByUsername(username, async (err, user) => {
@@ -67,14 +70,14 @@ app.post('/admin/login', (req, res) => {
   });
 });
 
-app.post('/admin/logout', (req, res) => {
+adminRouter.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     res.redirect('/admin/login');
   });
 });
 
 // Admin dashboard routes
-app.get('/admin', requireAuth, (req, res) => {
+adminRouter.get('/', requireAuth, (req, res) => {
   db.getAllPages((err, pages) => {
     if (err) {
       return res.status(500).send('Database error');
@@ -89,7 +92,7 @@ app.get('/admin', requireAuth, (req, res) => {
 });
 
 // Pages management
-app.get('/admin/pages', requireAuth, (req, res) => {
+adminRouter.get('/pages', requireAuth, (req, res) => {
   db.getAllPages((err, pages) => {
     if (err) {
       return res.status(500).send('Database error');
@@ -98,11 +101,11 @@ app.get('/admin/pages', requireAuth, (req, res) => {
   });
 });
 
-app.get('/admin/pages/new', requireAuth, (req, res) => {
+adminRouter.get('/pages/new', requireAuth, (req, res) => {
   res.render('edit-page', { user: req.session.user, page: null, action: 'create' });
 });
 
-app.get('/admin/pages/:id/edit', requireAuth, (req, res) => {
+adminRouter.get('/pages/:id/edit', requireAuth, (req, res) => {
   db.getPageById(req.params.id, (err, page) => {
     if (err || !page) {
       return res.status(404).send('Page not found');
@@ -111,7 +114,7 @@ app.get('/admin/pages/:id/edit', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/pages', requireAuth, (req, res) => {
+adminRouter.post('/pages', requireAuth, (req, res) => {
   const pageData = {
     title: req.body.title,
     slug: req.body.slug,
@@ -128,7 +131,7 @@ app.post('/admin/pages', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/pages/:id', requireAuth, (req, res) => {
+adminRouter.post('/pages/:id', requireAuth, (req, res) => {
   const pageData = {
     title: req.body.title,
     slug: req.body.slug,
@@ -145,7 +148,7 @@ app.post('/admin/pages/:id', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/pages/:id/delete', requireAuth, (req, res) => {
+adminRouter.post('/pages/:id/delete', requireAuth, (req, res) => {
   db.deletePage(req.params.id, (err) => {
     if (err) {
       return res.status(500).send('Error deleting page');
@@ -155,7 +158,7 @@ app.post('/admin/pages/:id/delete', requireAuth, (req, res) => {
 });
 
 // Posts management
-app.get('/admin/posts', requireAuth, (req, res) => {
+adminRouter.get('/posts', requireAuth, (req, res) => {
   db.getAllPosts((err, posts) => {
     if (err) {
       return res.status(500).send('Database error');
@@ -164,11 +167,11 @@ app.get('/admin/posts', requireAuth, (req, res) => {
   });
 });
 
-app.get('/admin/posts/new', requireAuth, (req, res) => {
+adminRouter.get('/posts/new', requireAuth, (req, res) => {
   res.render('edit-post', { user: req.session.user, post: null, action: 'create' });
 });
 
-app.get('/admin/posts/:id/edit', requireAuth, (req, res) => {
+adminRouter.get('/posts/:id/edit', requireAuth, (req, res) => {
   db.getPostById(req.params.id, (err, post) => {
     if (err || !post) {
       return res.status(404).send('Post not found');
@@ -177,7 +180,7 @@ app.get('/admin/posts/:id/edit', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/posts', requireAuth, (req, res) => {
+adminRouter.post('/posts', requireAuth, (req, res) => {
   const postData = {
     title: req.body.title,
     slug: req.body.slug,
@@ -194,7 +197,7 @@ app.post('/admin/posts', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/posts/:id', requireAuth, (req, res) => {
+adminRouter.post('/posts/:id', requireAuth, (req, res) => {
   const postData = {
     title: req.body.title,
     slug: req.body.slug,
@@ -211,7 +214,7 @@ app.post('/admin/posts/:id', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/posts/:id/delete', requireAuth, (req, res) => {
+adminRouter.post('/posts/:id/delete', requireAuth, (req, res) => {
   db.deletePost(req.params.id, (err) => {
     if (err) {
       return res.status(500).send('Error deleting post');
@@ -221,7 +224,7 @@ app.post('/admin/posts/:id/delete', requireAuth, (req, res) => {
 });
 
 // Build trigger
-app.post('/admin/build', requireAuth, (req, res) => {
+adminRouter.post('/build', requireAuth, (req, res) => {
   const { exec } = require('child_process');
   exec('npm run build', (error, stdout, stderr) => {
     if (error) {
@@ -232,7 +235,7 @@ app.post('/admin/build', requireAuth, (req, res) => {
 });
 
 // Settings
-app.get('/admin/settings', requireAuth, (req, res) => {
+adminRouter.get('/settings', requireAuth, (req, res) => {
   db.getAllSettings((err, settings) => {
     if (err) {
       return res.status(500).send('Database error');
@@ -245,7 +248,7 @@ app.get('/admin/settings', requireAuth, (req, res) => {
   });
 });
 
-app.post('/admin/settings', requireAuth, (req, res) => {
+adminRouter.post('/settings', requireAuth, (req, res) => {
   const settings = req.body;
   let completed = 0;
   const total = Object.keys(settings).length;
@@ -260,6 +263,9 @@ app.post('/admin/settings', requireAuth, (req, res) => {
   });
 });
 
+// Mount admin router
+app.use('/admin', adminRouter);
+
 // Public routes (serve static site)
 app.get('/', (req, res) => {
   const filePath = path.join(__dirname, '../build/index.html');
@@ -272,7 +278,7 @@ app.get('/', (req, res) => {
 
 // Serve static assets from build directory, but exclude admin paths
 app.use((req, res, next) => {
-  // Skip static file serving for any admin routes
+  // Skip static file serving for any admin routes or admin-related paths
   if (req.path.startsWith('/admin')) {
     return next();
   }
@@ -280,7 +286,6 @@ app.use((req, res, next) => {
 });
 
 app.get('/:slug', (req, res, next) => {
-  // This route should never handle admin paths due to middleware above
   const filePath = path.join(__dirname, '../build', req.params.slug + '.html');
   res.sendFile(filePath, (err) => {
     if (err) {
