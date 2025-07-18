@@ -29,9 +29,6 @@ npm run dev
 
 The admin panel will be available at `http://localhost:3000/admin`
 
-**Default Login Credentials:**
-- Username: `bogdan`
-- Password: `bogdan`
 
 ### 3. Build Static Site
 
